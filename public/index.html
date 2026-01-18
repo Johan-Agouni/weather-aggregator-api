@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AtmoSphere — Météo mondiale en temps réel</title>
+    <meta name="description" content="Dashboard météo interactif avec globe 3D, indice UV et qualité de l'air en temps réel.">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <svg class="brand-icon" width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="16" cy="16" r="14" stroke="#3B82F6" stroke-width="1.5" fill="none"/>
+                <circle cx="16" cy="16" r="10" stroke="#3B82F6" stroke-width="0.8" opacity="0.5" fill="none"/>
+                <ellipse cx="16" cy="16" rx="6" ry="10" stroke="#3B82F6" stroke-width="0.8" opacity="0.5" fill="none"/>
+                <circle cx="22" cy="10" r="3.5" fill="#F59E0B" opacity="0.9"/>
+            </svg>
+            <span class="brand-text">AtmoSphere</span>
+        </div>
+
+        <div class="nav-search">
+            <div class="search-wrapper">
+                <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                    <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+                </svg>
+                <input type="text" id="cityInput" placeholder="Search any city..." autocomplete="off">
+                <div id="autocomplete" class="autocomplete-dropdown hidden"></div>
+            </div>
+        </div>
+
+        <div class="nav-actions">
+            <button id="geolocateBtn" class="nav-btn-label" title="Me localiser">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                    <circle cx="12" cy="12" r="3"/><path d="M12 2v4m0 12v4m10-10h-4M6 12H2"/>
+                </svg>
+                <span>Ma position</span>
+            </button>
+
+            <div class="dropdown-wrapper">
+                <button id="toggleCoordsBtn" class="nav-btn-label" title="Recherche par coordonnées GPS">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <circle cx="12" cy="12" r="10"/><path d="m16.2 7.8-2 6.3-6.4 2.1 2-6.3z"/>
+                    </svg>
+                    <span>Coordonnées</span>
+                </button>
+                <div id="coordsPanel" class="dropdown-panel hidden">
+                    <label class="dropdown-label">Coordonnées GPS</label>
+                    <input type="number" id="latInput" placeholder="Latitude" step="0.0001" class="dropdown-input">
+                    <input type="number" id="lonInput" placeholder="Longitude" step="0.0001" class="dropdown-input">
+                    <button id="coordsBtn" class="btn-primary-sm">Rechercher</button>
+                </div>
+            </div>
+
+            <div class="dropdown-wrapper">
+                <button id="exportBtn" class="nav-btn-label" title="Exporter les données">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    <span>Exporter</span>
+                </button>
+                <div id="exportMenu" class="dropdown-panel hidden">
+                    <label class="dropdown-label">Exporter les données</label>
+                    <button id="exportJsonBtn" class="dropdown-action">Exporter en JSON</button>
+                    <button id="exportCsvBtn" class="dropdown-action">Exporter en CSV</button>
+                </div>
+            </div>
+
+            <a href="/admin/" class="nav-btn-label" title="Security Dashboard">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                <span>Security</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Hero Section with 3D Globe -->
+    <section class="hero-section">
+        <div id="globeContainer" class="globe-container"></div>
+        <div class="hero-overlay">
+            <p class="hero-hint" id="heroHint">Click anywhere on Earth or search a city above</p>
+        </div>
+        <div id="locationBadge" class="location-badge hidden">
+            <div class="badge-city" id="locationName">--</div>
+            <div class="badge-meta">
+                <span class="badge-coords" id="coordinates">--</span>
+                <span class="badge-sep">&middot;</span>
+                <span class="badge-time" id="timestamp">--</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Loading -->
+    <div id="loading" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p class="loading-text">Fetching weather data...</p>
+    </div>
+
+    <!-- Error -->
+    <div id="error" class="error-toast hidden"></div>
+
+    <!-- Weather Results -->
+    <main id="results" class="results-section hidden">
+        <div class="data-grid">
+            <!-- Weather Card -->
+            <div class="card">
+                <div class="card-header">
+                    <svg class="card-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <path d="M12 2v2m0 16v2m10-10h-2M4 12H2m15.1-5.1-1.4 1.4M8.3 15.7l-1.4 1.4m0-10.2 1.4 1.4m7.4 7.4 1.4 1.4"/>
+                        <circle cx="12" cy="12" r="4"/>
+                    </svg>
+                    <h2>Current Weather</h2>
+                </div>
+                <div class="card-body">
+                    <div class="temp-display">
+                        <div class="weather-icon-container" id="weatherIcon"></div>
+                        <span class="temp-value" id="temperature">--°C</span>
+                    </div>
+                    <p class="conditions-text" id="conditions">--</p>
+                    <div class="weather-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Humidity</span>
+                            <span class="detail-value" id="humidity">--%</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Wind</span>
+                            <span class="detail-value" id="wind">-- km/h</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Precipitation</span>
+                            <span class="detail-value" id="precipitation">-- mm</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- UV Index Card -->
+            <div class="card">
+                <div class="card-header">
+                    <svg class="card-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <circle cx="12" cy="12" r="5"/><path d="M12 1v2m0 18v2m11-11h-2M3 12H1m17.1-7.1-1.4 1.4M7.3 16.7l-1.4 1.4m0-12.2 1.4 1.4m9.4 9.4 1.4 1.4"/>
+                    </svg>
+                    <h2>UV Index</h2>
+                </div>
+                <div class="card-body uv-body">
+                    <span class="big-value" id="uvIndex">--</span>
+                    <div class="uv-bar">
+                        <div class="uv-bar-indicator" id="uvBarFill"></div>
+                    </div>
+                    <span class="status-badge" id="uvRisk">--</span>
+                </div>
+            </div>
+
+            <!-- Air Quality Card -->
+            <div class="card">
+                <div class="card-header">
+                    <svg class="card-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/>
+                    </svg>
+                    <h2>Air Quality</h2>
+                </div>
+                <div class="card-body">
+                    <span class="big-value" id="aqi">--</span>
+                    <span class="status-badge" id="airQuality">--</span>
+                    <div class="weather-details">
+                        <div class="detail-item">
+                            <span class="detail-label">PM2.5</span>
+                            <span class="detail-value" id="pm25">-- &micro;g/m&sup3;</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">PM10</span>
+                            <span class="detail-value" id="pm10">-- &micro;g/m&sup3;</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recommendations -->
+        <div class="card card-wide recommendations-card">
+            <div class="card-header">
+                <svg class="card-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                    <path d="M9 18h6m-5-6h.01M15 12h.01M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z"/>
+                </svg>
+                <h2>Recommendations</h2>
+            </div>
+            <div class="card-body">
+                <ul id="recommendationsList" class="recommendations-list"></ul>
+            </div>
+        </div>
+
+        <!-- 7-Day Forecast -->
+        <div class="card card-wide forecast-card">
+            <div class="card-header">
+                <svg class="card-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                <h2>7-Day Forecast</h2>
+            </div>
+            <div class="card-body">
+                <div class="forecast-chart-container">
+                    <canvas id="forecastChart"></canvas>
+                </div>
+                <div id="forecastDays" class="forecast-days"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <span>Built by Johan Agouni</span>
+        <span class="footer-dot"></span>
+        <a href="https://github.com/Johan-Agouni" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <span class="footer-dot"></span>
+        <span>v1.0.0</span>
+    </footer>
+
+    <script src="https://unpkg.com/globe.gl@2.35.1/dist/globe.gl.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
