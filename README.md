@@ -7,6 +7,7 @@ Real-time weather data, UV index, and air quality metrics from multiple APIs wit
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Security](https://img.shields.io/badge/security-enterprise-brightgreen)
 ![Node](https://img.shields.io/badge/node-%3E%3D16.0.0-green)
+![Tests](https://github.com/Johan-Agouni/weather-aggregator-api/actions/workflows/ci.yml/badge.svg)
 
 ---
 
