@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Dashboard - Weather Aggregator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="security-dashboard.css">
+</head>
+<body>
+    <div class="terminal-container">
+        <div class="terminal-header">
+            <div class="terminal-buttons">
+                <span class="btn-close"></span>
+                <span class="btn-minimize"></span>
+                <span class="btn-maximize"></span>
+            </div>
+            <div class="terminal-title">security-dashboard@terminal:~$</div>
+        </div>
+
+        <div class="terminal-content">
+            <div class="ascii-logo">
+ ███████╗███████╗ ██████╗██╗   ██╗██████╗ ██╗████████╗██╗   ██╗
+ ██╔════╝██╔════╝██╔════╝██║   ██║██╔══██╗██║╚══██╔══╝╚██╗ ██╔╝
+ ███████╗█████╗  ██║     ██║   ██║██████╔╝██║   ██║    ╚████╔╝ 
+ ╚════██║██╔══╝  ██║     ██║   ██║██╔══██╗██║   ██║     ╚██╔╝  
+ ███████║███████╗╚██████╗╚██████╔╝██║  ██║██║   ██║      ██║   
+ ╚══════╝╚══════╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝   ╚═╝      ╚═╝   
+            </div>
+
+            <div class="terminal-info">
+                <p>Real-time Security Monitoring & Threat Detection</p>
+                <p>Weather Aggregator API v1.0.0</p>
+            </div>
+
+            <!-- Stats Overview -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">TOTAL REQUESTS</div>
+                    <div class="stat-value" id="totalRequests">--</div>
+                    <div class="stat-label"><span id="requestsPerSec">0</span> req/s</div>
+                </div>
+
+                <div class="stat-card blocked">
+                    <div class="stat-header">BLOCKED</div>
+                    <div class="stat-value" id="blockedRequests">--</div>
+                    <div class="stat-label">Malicious attempts</div>
+                </div>
+
+                <div class="stat-card suspicious">
+                    <div class="stat-header">SUSPICIOUS</div>
+                    <div class="stat-value" id="suspiciousRequests">--</div>
+                    <div class="stat-label">Flagged IPs</div>
+                </div>
+
+                <div class="stat-card uptime">
+                    <div class="stat-header">UPTIME</div>
+                    <div class="stat-value" id="uptime">--</div>
+                    <div class="stat-label">System online</div>
+                </div>
+            </div>
+
+            <!-- Traffic Distribution -->
+            <div class="section-block">
+                <div class="block-header">
+                    <span>TRAFFIC DISTRIBUTION</span>
+                    <button id="refreshBtn" class="refresh-btn">[ REFRESH ]</button>
+                </div>
+                <div class="block-content">
+                    <canvas id="trafficChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Threats Detection -->
+            <div class="section-block">
+                <div class="block-header">THREAT DETECTION</div>
+                <div class="block-content">
+                    <div class="threats-grid">
+                        <div class="threat-item">
+                            <span class="threat-label">SQL Injection:</span>
+                            <span class="threat-count" id="sqlInjectionCount">0</span>
+                        </div>
+                        <div class="threat-item">
+                            <span class="threat-label">XSS Attempts:</span>
+                            <span class="threat-count" id="xssCount">0</span>
+                        </div>
+                        <div class="threat-item">
+                            <span class="threat-label">Path Traversal:</span>
+                            <span class="threat-count" id="pathTraversalCount">0</span>
+                        </div>
+                        <div class="threat-item">
+                            <span class="threat-label">Command Injection:</span>
+                            <span class="threat-count" id="commandInjectionCount">0</span>
+                        </div>
+                        <div class="threat-item">
+                            <span class="threat-label">Rate Limit Violations:</span>
+                            <span class="threat-count" id="rateLimitCount">0</span>
+                        </div>
+                        <div class="threat-item">
+                            <span class="threat-label">Invalid Inputs:</span>
+                            <span class="threat-count" id="invalidInputCount">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Banned IPs -->
+            <div class="section-block">
+                <div class="block-header">
+                    <span>BANNED IPs (<span id="bannedCount">0</span>)</span>
+                </div>
+                <div class="block-content">
+                    <div id="bannedIPsList" class="ip-list">
+                        <div class="empty-state">No banned IPs</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Suspicious IPs -->
+            <div class="section-block">
+                <div class="block-header">
+                    <span>SUSPICIOUS IPs (<span id="suspiciousCount">0</span>)</span>
+                </div>
+                <div class="block-content">
+                    <div id="suspiciousIPsList" class="ip-list">
+                        <div class="empty-state">No suspicious IPs</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Events -->
+            <div class="section-block">
+                <div class="block-header">RECENT SECURITY EVENTS</div>
+                <div class="block-content">
+                    <div id="eventsList" class="events-list">
+                        <div class="empty-state">No recent events</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance -->
+            <div class="section-block">
+                <div class="block-header">PERFORMANCE METRICS</div>
+                <div class="block-content">
+                    <div class="perf-metrics">
+                        <div class="perf-item">
+                            <span class="perf-label">Avg Response Time:</span>
+                            <span class="perf-value" id="avgResponseTime">-- ms</span>
+                        </div>
+                        <div class="perf-item">
+                            <span class="perf-label">Total Samples:</span>
+                            <span class="perf-value" id="totalSamples">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="terminal-footer">
+            <span class="footer-text">Security Dashboard v1.0.0</span>
+            <span class="footer-separator">|</span>
+            <span class="footer-text">Auto-refresh: <span id="autoRefreshStatus">ON</span></span>
+            <span class="footer-separator">|</span>
+            <a href="/" class="footer-link">← Back to App</a>
+        </div>
+    </div>
+
+    <script src="security-dashboard.js"></script>
+</body>
+</html>

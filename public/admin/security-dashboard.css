@@ -1,0 +1,486 @@
+/**
+ * Security Dashboard Styles
+ * Terminal-style design cohérent avec l'app principale
+ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    background: #000000;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    color: #00FF41;
+    user-select: none;
+}
+
+.terminal-container {
+    width: 100%;
+    max-width: 1600px;
+    background: #0F0F0F;
+    border: 2px solid #00FF41;
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+}
+
+/* Terminal Header */
+.terminal-header {
+    background: #1A1A1A;
+    padding: 12px 16px;
+    border-bottom: 1px solid #00FF41;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.terminal-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.terminal-buttons span {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 1px solid #333;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.terminal-buttons span:hover {
+    transform: scale(1.1);
+}
+
+.btn-close {
+    background: #FF5F56;
+    border-color: #FF5F56;
+}
+
+.btn-minimize {
+    background: #FFBD2E;
+    border-color: #FFBD2E;
+}
+
+.btn-maximize {
+    background: #27C93F;
+    border-color: #27C93F;
+}
+
+.terminal-title {
+    font-size: 13px;
+    color: #00FF41;
+    font-weight: 500;
+}
+
+/* Terminal Content */
+.terminal-content {
+    padding: 30px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.ascii-logo {
+    color: #00FF41;
+    font-size: 8px;
+    line-height: 1.2;
+    margin-bottom: 20px;
+    white-space: pre;
+    text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+}
+
+.terminal-info {
+    margin-bottom: 30px;
+}
+
+.terminal-info p {
+    font-size: 14px;
+    margin-bottom: 8px;
+    color: #00FFFF;
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: #0A0A0A;
+    border: 2px solid #00FF41;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.3s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 255, 65, 0.4);
+}
+
+.stat-card.blocked {
+    border-color: #FF0000;
+}
+
+.stat-card.blocked .stat-value {
+    color: #FF0000;
+}
+
+.stat-card.suspicious {
+    border-color: #FFFF00;
+}
+
+.stat-card.suspicious .stat-value {
+    color: #FFFF00;
+}
+
+.stat-card.uptime {
+    border-color: #00FFFF;
+}
+
+.stat-card.uptime .stat-value {
+    color: #00FFFF;
+}
+
+.stat-header {
+    font-size: 11px;
+    color: #666;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+}
+
+.stat-value {
+    font-size: 42px;
+    font-weight: 700;
+    color: #00FF41;
+    text-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+    margin-bottom: 8px;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #666;
+}
+
+/* Section Block */
+.section-block {
+    margin-bottom: 30px;
+    border: 1px solid #00FF41;
+    background: #0A0A0A;
+}
+
+.block-header {
+    background: #1A1A1A;
+    padding: 12px 16px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #00FFFF;
+    letter-spacing: 2px;
+    border-bottom: 1px solid #00FF41;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.refresh-btn {
+    background: #000000;
+    border: 1px solid #00FF41;
+    color: #00FF41;
+    padding: 6px 12px;
+    font-family: inherit;
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.refresh-btn:hover {
+    background: #00FF41;
+    color: #000000;
+}
+
+.block-content {
+    padding: 20px;
+}
+
+/* Traffic Chart */
+#trafficChart {
+    max-height: 300px;
+}
+
+/* Threats Grid */
+.threats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 16px;
+}
+
+.threat-item {
+    background: #000000;
+    padding: 12px 16px;
+    border-left: 3px solid #00FF41;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s;
+}
+
+.threat-item:hover {
+    border-left-color: #00FFFF;
+    background: #0F0F0F;
+}
+
+.threat-label {
+    font-size: 12px;
+    color: #666;
+}
+
+.threat-count {
+    font-size: 18px;
+    font-weight: 700;
+    color: #00FF41;
+}
+
+/* IP List */
+.ip-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.ip-item {
+    background: #000000;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    border-left: 3px solid #FF0000;
+    transition: all 0.2s;
+}
+
+.ip-item:hover {
+    background: #0F0F0F;
+}
+
+.ip-item.suspicious {
+    border-left-color: #FFFF00;
+}
+
+.ip-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.ip-address {
+    font-size: 14px;
+    font-weight: 700;
+    color: #00FFFF;
+}
+
+.ip-score {
+    font-size: 12px;
+    padding: 4px 8px;
+    background: #1A1A1A;
+    border: 1px solid #FF0000;
+    color: #FF0000;
+}
+
+.ip-score.medium {
+    border-color: #FFFF00;
+    color: #FFFF00;
+}
+
+.ip-info {
+    font-size: 11px;
+    color: #666;
+    margin-bottom: 4px;
+}
+
+.ip-actions {
+    margin-top: 8px;
+}
+
+.unban-btn {
+    background: #000000;
+    border: 1px solid #00FF41;
+    color: #00FF41;
+    padding: 4px 12px;
+    font-family: inherit;
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.unban-btn:hover {
+    background: #00FF41;
+    color: #000000;
+}
+
+/* Events List */
+.events-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.event-item {
+    background: #000000;
+    padding: 10px 14px;
+    margin-bottom: 6px;
+    border-left: 3px solid #00FF41;
+    font-size: 11px;
+    transition: all 0.2s;
+}
+
+.event-item:hover {
+    background: #0F0F0F;
+}
+
+.event-item.blocked {
+    border-left-color: #FF0000;
+}
+
+.event-item.suspicious {
+    border-left-color: #FFFF00;
+}
+
+.event-item.threat {
+    border-left-color: #FF00FF;
+}
+
+.event-time {
+    color: #666;
+    margin-right: 8px;
+}
+
+.event-type {
+    color: #00FFFF;
+    text-transform: uppercase;
+    margin-right: 8px;
+}
+
+.event-ip {
+    color: #00FF41;
+}
+
+.event-details {
+    color: #999;
+    margin-left: 16px;
+    margin-top: 4px;
+}
+
+/* Performance Metrics */
+.perf-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 16px;
+}
+
+.perf-item {
+    background: #000000;
+    padding: 12px 16px;
+    border-left: 3px solid #00FFFF;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.perf-label {
+    font-size: 12px;
+    color: #666;
+}
+
+.perf-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: #00FFFF;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+    font-size: 13px;
+}
+
+/* Terminal Footer */
+.terminal-footer {
+    background: #1A1A1A;
+    padding: 12px 16px;
+    border-top: 1px solid #00FF41;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 12px;
+}
+
+.footer-text {
+    color: #666;
+}
+
+.footer-separator {
+    color: #333;
+}
+
+.footer-link {
+    color: #00FFFF;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.footer-link:hover {
+    color: #00FF41;
+    text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #000000;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #00FF41;
+    border: 1px solid #000000;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #00FFFF;
+}
+
+/* Animations */
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.loading {
+    animation: pulse 1.5s infinite;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .terminal-content {
+        padding: 20px;
+    }
+    
+    .ascii-logo {
+        font-size: 6px;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .threats-grid {
+        grid-template-columns: 1fr;
+    }
+}

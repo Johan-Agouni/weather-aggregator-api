@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Terminal - Agrégateur Météo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div class="terminal-container">
+        <div class="terminal-header">
+            <div class="terminal-buttons">
+                <span class="btn-close"></span>
+                <span class="btn-minimize"></span>
+                <span class="btn-maximize"></span>
+            </div>
+            <div class="terminal-title">weather-aggregator@terminal:~$</div>
+        </div>
+
+        <div class="terminal-content">
+            <div class="ascii-logo">
+ ██╗    ██╗███████╗ █████╗ ████████╗██╗  ██╗███████╗██████╗ 
+ ██║    ██║██╔════╝██╔══██╗╚══██╔══╝██║  ██║██╔════╝██╔══██╗
+ ██║ █╗ ██║█████╗  ███████║   ██║   ███████║█████╗  ██████╔╝
+ ██║███╗██║██╔══╝  ██╔══██║   ██║   ██╔══██║██╔══╝  ██╔══██╗
+ ╚███╔███╔╝███████╗██║  ██║   ██║   ██║  ██║███████╗██║  ██║
+  ╚══╝╚══╝ ╚══════╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝
+            </div>
+
+            <div class="terminal-info">
+                <p>Météo • UV Index • Qualité de l'Air</p>
+                <p>Real-time weather aggregator v1.0.0</p>
+            </div>
+
+            <div class="search-section">
+                <div class="command-line">
+                    <span class="command-text">weather --search</span>
+                </div>
+                <div class="search-input-wrapper">
+                    <input 
+                        type="text" 
+                        id="cityInput" 
+                        placeholder="Entrez une ville (ex: Paris, Tokyo, New York...)" 
+                        autocomplete="off"
+                    />
+                    <div id="autocomplete" class="autocomplete-dropdown hidden"></div>
+                </div>
+                <button id="searchBtn" class="terminal-button">
+                    <span class="btn-bracket">[</span> SEARCH <span class="btn-bracket">]</span>
+                </button>
+            </div>
+
+            <div class="divider">
+                <span>OU COORDONNÉES GPS</span>
+            </div>
+
+            <div class="coords-section">
+                <div class="command-line">
+                    <span class="command-text">weather --coordinates</span>
+                </div>
+                <div class="coords-inputs">
+                    <input type="number" id="latInput" placeholder="LAT: 43.5" step="0.01" />
+                    <input type="number" id="lonInput" placeholder="LON: 5.4" step="0.01" />
+                </div>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <button id="coordsBtn" class="terminal-button" style="flex: 1; min-width: 200px;">
+                        <span class="btn-bracket">[</span> EXECUTE <span class="btn-bracket">]</span>
+                    </button>
+                    <button onclick="getUserLocation()" class="terminal-button" style="flex: 1; min-width: 200px; border-color: #00FFFF;">
+                        <span class="btn-bracket" style="color: #00FF41;">[</span> ▶ MA POSITION <span class="btn-bracket" style="color: #00FF41;">]</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="loading" class="loading hidden">
+                <div class="loading-text">
+                    <span class="prompt">$</span> Fetching data<span class="loading-dots">...</span>
+                </div>
+                <div class="loading-bar">
+                    <div class="loading-progress"></div>
+                </div>
+            </div>
+
+            <div id="error" class="error hidden"></div>
+
+            <div id="results" class="results hidden">
+                <div class="location-block">
+                    <div class="block-header">LOCATION INFO</div>
+                    <div class="location-content">
+                        <div class="data-row">
+                            <span class="data-label">CITY:</span>
+                            <span class="data-value" id="locationName">--</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">COORDS:</span>
+                            <span class="data-value" id="coordinates">--</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">TIMESTAMP:</span>
+                            <span class="data-value" id="timestamp">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="data-grid">
+                    <!-- Météo -->
+                    <div class="data-block weather-block">
+                        <div class="block-header">WEATHER DATA</div>
+                        <div class="block-content">
+                            <div class="main-value">
+                                <span class="value-label">TEMP:</span>
+                                <span class="value-number" id="temperature">--°C</span>
+                            </div>
+                            <div class="weather-icon-container" id="weatherIcon"></div>
+                            <div class="data-row">
+                                <span class="data-label">STATUS:</span>
+                                <span class="data-value" id="conditions">--</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="data-label">HUMIDITY:</span>
+                                <span class="data-value" id="humidity">--%</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="data-label">WIND:</span>
+                                <span class="data-value" id="wind">-- km/h</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="data-label">PRECIP:</span>
+                                <span class="data-value" id="precipitation">-- mm</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- UV Index -->
+                    <div class="data-block uv-block">
+                        <div class="block-header">UV INDEX</div>
+                        <div class="block-content">
+                            <div class="main-value">
+                                <span class="value-label">INDEX:</span>
+                                <span class="value-number" id="uvIndex">--</span>
+                            </div>
+                            <div class="status-badge" id="uvRisk">--</div>
+                        </div>
+                    </div>
+
+                    <!-- Air Quality -->
+                    <div class="data-block air-block">
+                        <div class="block-header">AIR QUALITY</div>
+                        <div class="block-content">
+                            <div class="main-value">
+                                <span class="value-label">AQI:</span>
+                                <span class="value-number" id="aqi">--</span>
+                            </div>
+                            <div class="status-badge" id="airQuality">--</div>
+                            <div class="data-row">
+                                <span class="data-label">PM2.5:</span>
+                                <span class="data-value" id="pm25">-- µg/m³</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="data-label">PM10:</span>
+                                <span class="data-value" id="pm10">-- µg/m³</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recommendations -->
+                <div class="recommendations-block">
+                    <div class="block-header">SYSTEM RECOMMENDATIONS</div>
+                    <div class="recommendations-content">
+                        <ul id="recommendationsList"></ul>
+                    </div>
+                </div>
+
+                <!-- Export Buttons -->
+                <div style="display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap;">
+                    <button onclick="exportDataJSON()" class="export-button" style="flex: 1; min-width: 200px;">
+                        <span style="color: #00FF41;">[</span> EXPORT JSON <span style="color: #00FF41;">]</span>
+                    </button>
+                    <button onclick="exportDataCSV()" class="export-button" style="flex: 1; min-width: 200px;">
+                        <span style="color: #00FF41;">[</span> EXPORT CSV <span style="color: #00FF41;">]</span>
+                    </button>
+                </div>
+
+                <!-- 7-Day Forecast -->
+                <div class="forecast-section">
+                    <div class="block-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>7-DAY FORECAST</span>
+                        <button id="toggleForecast" class="forecast-toggle" style="background: none; border: 1px solid #00FF41; color: #00FF41; padding: 4px 12px; cursor: pointer; font-family: inherit; font-size: 11px;">
+                            [ SHOW ]
+                        </button>
+                    </div>
+                    <div id="forecastContent" class="forecast-content hidden">
+                        <div class="forecast-loading hidden" id="forecastLoading">
+                            <span class="loading-text">Loading forecast<span class="loading-dots">...</span></span>
+                        </div>
+                        <div class="forecast-chart-container">
+                            <canvas id="forecastChart"></canvas>
+                        </div>
+                        <div id="forecastDays" class="forecast-days"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="terminal-footer">
+            <span class="footer-text">Développé par Johan Agouni</span>
+            <span class="footer-separator">|</span>
+            <a href="https://github.com/Johan-Agouni" target="_blank" class="footer-link">GitHub</a>
+            <span class="footer-separator">|</span>
+            <span class="footer-text">v1.0.0</span>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
