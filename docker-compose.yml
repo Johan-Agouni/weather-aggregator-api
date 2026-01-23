@@ -1,0 +1,34 @@
+services:
+  api:
+    build: .
+    container_name: weather-api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - CACHE_TTL=300
+    volumes:
+      # Persister les logs
+      - ./logs:/app/logs
+      # Persister les données de sécurité
+      - ./src/security/data:/app/src/security/data
+    networks:
+      - weather-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  weather-network:
+    driver: bridge
+
+# Utilisation :
+# docker-compose up -d       # Démarrer en arrière-plan
+# docker-compose logs -f     # Voir les logs
+# docker-compose down        # Arrêter
+# docker-compose restart     # Redémarrer
