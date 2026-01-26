@@ -7,13 +7,11 @@
 
 const axios = require('axios');
 const cache = require('../utils/cache');
+const logger = require('../security/monitoring/logger');
 
 class UVIndexService {
     constructor() {
-        // Base URL from environment variable
         this.baseURL = process.env.UV_INDEX_URL || 'https://currentuvindex.com/api/v1/uvi';
-
-        // Timeout from environment variable (default: 5 seconds)
         this.timeout = parseInt(process.env.API_TIMEOUT || '5000');
     }
 
@@ -24,16 +22,15 @@ class UVIndexService {
      * @returns {Promise<Object>} UV index data
      */
     async getUVIndex(lat, lon) {
-        // Check cache first
         const cacheKey = cache.generateKey(lat, lon, 'uv');
         const cachedData = cache.get(cacheKey);
 
         if (cachedData) {
-            console.log(`[CACHE HIT] UV index for ${lat}, ${lon}`);
+            logger.info(`[CACHE HIT] UV index for ${lat}, ${lon}`);
             return cachedData;
         }
 
-        console.log(`[CACHE MISS] Fetching UV index for ${lat}, ${lon}`);
+        logger.info(`[CACHE MISS] Fetching UV index for ${lat}, ${lon}`);
 
         try {
             const response = await axios.get(this.baseURL, {
@@ -51,15 +48,13 @@ class UVIndexService {
                 risk_level: this.getUVRiskLevel(uv),
             };
 
-            // Store in cache
             cache.set(cacheKey, uvData);
 
             return uvData;
         } catch (error) {
-            console.error('[ERROR] UV Index API:', error.message);
+            logger.error('[ERROR] UV Index API:', { message: error.message });
 
             // Graceful degradation - return null data instead of throwing
-            // This allows other data to be displayed even if UV API fails
             return {
                 uv_index: null,
                 risk_level: 'Unknown',

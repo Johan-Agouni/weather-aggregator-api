@@ -1,8 +1,8 @@
 # 🛡️ SECURITY DOCUMENTATION
 
-## Weather Aggregator API - Security Features
+## AtmoSphere - Security Features
 
-This document describes the comprehensive security architecture implemented in the Weather Aggregator API.
+This document describes the comprehensive security architecture implemented in the AtmoSphere.
 
 ---
 
@@ -23,7 +23,7 @@ This document describes the comprehensive security architecture implemented in t
 
 ## 🎯 SECURITY OVERVIEW
 
-The Weather Aggregator API implements **enterprise-level security** with multiple layers of protection:
+The AtmoSphere implements **enterprise-level security** with multiple layers of protection:
 
 - **HTTP Security Headers** (Helmet)
 - **Attack Detection** (SQL Injection, XSS, Path Traversal, etc.)
@@ -217,7 +217,7 @@ Each threat type has a score:
 | Rate Limit        | 10    |
 | Invalid Input     | 5     |
 
-**Auto-ban threshold:** 100 points or 10 attempts
+**Auto-ban threshold:** 300 points or 20 attempts (configurable via env vars)
 
 ---
 
@@ -227,8 +227,8 @@ Each threat type has a score:
 
 An IP is automatically banned when:
 
-1. **Threat score ≥ 100** (accumulated malicious attempts)
-2. **≥ 10 suspicious attempts** in short period
+1. **Threat score ≥ 300** (accumulated malicious attempts)
+2. **≥ 20 suspicious attempts** in short period
 3. **Multiple rate limit violations**
 
 ### Ban Duration
@@ -328,7 +328,7 @@ logs/
 Access the real-time security dashboard:
 
 ```
-http://localhost:3000/admin/security
+http://localhost:3000/admin/
 ```
 
 ### Features
@@ -386,8 +386,9 @@ CORS_ORIGIN=*  # Configure for production!
 **Adjust ban thresholds:**
 ```javascript
 // src/security/middleware/ipBan.js
-const BAN_THRESHOLD_SCORE = 100;
-const BAN_THRESHOLD_ATTEMPTS = 10;
+// Configurable via env vars
+const BAN_THRESHOLD_SCORE = process.env.BAN_THRESHOLD_SCORE || 300;
+const BAN_THRESHOLD_ATTEMPTS = process.env.BAN_THRESHOLD_ATTEMPTS || 20;
 ```
 
 **Modify threat scores:**

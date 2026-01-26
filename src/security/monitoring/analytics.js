@@ -4,7 +4,6 @@
  * Collecte et analyse les métriques de sécurité
  */
 
-const logger = require('./logger');
 const ipBanManager = require('../middleware/ipBan');
 
 class SecurityAnalytics {

@@ -1,6 +1,15 @@
 const js = require('@eslint/js');
 
 module.exports = [
+    {
+        ignores: [
+            'node_modules/**',
+            'coverage/**',
+            'logs/**',
+            'dist/**',
+            'build/**',
+        ],
+    },
     js.configs.recommended,
     {
         languageOptions: {
@@ -27,19 +36,33 @@ module.exports = [
                 afterEach: 'readonly',
                 beforeAll: 'readonly',
                 afterAll: 'readonly',
-                jest: 'readonly'
-            }
+                jest: 'readonly',
+            },
         },
         rules: {
             'no-console': 'off',
-            'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }]
+            'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
         },
-        ignores: [
-            'node_modules/**',
-            'coverage/**',
-            'logs/**',
-            'dist/**',
-            'build/**'
-        ]
-    }
+    },
+    // Browser globals for public JS files
+    {
+        files: ['public/**/*.js'],
+        languageOptions: {
+            sourceType: 'script',
+            globals: {
+                window: 'readonly',
+                document: 'readonly',
+                navigator: 'readonly',
+                localStorage: 'readonly',
+                fetch: 'readonly',
+                alert: 'readonly',
+                confirm: 'readonly',
+                URL: 'readonly',
+                Blob: 'readonly',
+                ResizeObserver: 'readonly',
+                Chart: 'readonly',
+                Globe: 'readonly',
+            },
+        },
+    },
 ];

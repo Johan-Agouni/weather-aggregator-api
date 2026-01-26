@@ -25,8 +25,8 @@ const cache = new NodeCache({
  * @returns {string} Cache key
  */
 function generateKey(lat, lon, prefix = '') {
-    const roundedLat = Math.round(lat * 100) / 100; // Round to 2 decimals
-    const roundedLon = Math.round(lon * 100) / 100;
+    const roundedLat = Math.round(lat * 10000) / 10000; // Round to 4 decimals (~11m precision)
+    const roundedLon = Math.round(lon * 10000) / 10000;
     return `${prefix}:${roundedLat}:${roundedLon}`;
 }
 

@@ -9,6 +9,7 @@ const uvIndexService = require('../services/uvIndexService');
 const airQualityService = require('../services/airQualityService');
 const forecastService = require('../services/forecastService');
 const { validateCoordinates } = require('../utils/validator');
+const logger = require('../security/monitoring/logger');
 
 class WeatherController {
     /**
@@ -19,7 +20,6 @@ class WeatherController {
         try {
             const { lat, lon } = req.query;
 
-            // Validate coordinates
             const validation = validateCoordinates(lat, lon);
 
             if (!validation.valid) {
@@ -31,12 +31,10 @@ class WeatherController {
 
             const { lat: validLat, lon: validLon } = validation.coords;
 
-            console.log(`[REQUEST] 7-day forecast for coordinates: ${validLat}, ${validLon}`);
+            logger.info(`[REQUEST] 7-day forecast for coordinates: ${validLat}, ${validLon}`);
 
-            // Fetch forecast data
             const forecast = await forecastService.getForecast(validLat, validLon);
 
-            // Build response
             const response = {
                 location: {
                     lat: validLat,
@@ -46,11 +44,11 @@ class WeatherController {
                 timestamp: new Date().toISOString(),
             };
 
-            console.log(`[SUCCESS] Forecast data sent for ${validLat}, ${validLon}`);
+            logger.info(`[SUCCESS] Forecast data sent for ${validLat}, ${validLon}`);
 
             res.json(response);
         } catch (error) {
-            console.error('[ERROR] Forecast Controller:', error.message);
+            logger.error('[ERROR] Forecast Controller:', { message: error.message });
 
             res.status(500).json({
                 error: 'Internal Server Error',
@@ -67,7 +65,6 @@ class WeatherController {
         try {
             const { lat, lon } = req.query;
 
-            // Validate coordinates
             const validation = validateCoordinates(lat, lon);
 
             if (!validation.valid) {
@@ -79,7 +76,7 @@ class WeatherController {
 
             const { lat: validLat, lon: validLon } = validation.coords;
 
-            console.log(`[REQUEST] Weather data for coordinates: ${validLat}, ${validLon}`);
+            logger.info(`[REQUEST] Weather data for coordinates: ${validLat}, ${validLon}`);
 
             // Fetch data from all services in parallel
             const [weather, uvIndex, airQuality] = await Promise.all([
@@ -88,10 +85,8 @@ class WeatherController {
                 airQualityService.getAirQuality(validLat, validLon),
             ]);
 
-            // Generate recommendations based on all data
             const recommendations = this.generateRecommendations(weather, uvIndex, airQuality);
 
-            // Build response
             const response = {
                 location: {
                     lat: validLat,
@@ -104,13 +99,12 @@ class WeatherController {
                 timestamp: new Date().toISOString(),
             };
 
-            console.log(`[SUCCESS] Weather data sent for ${validLat}, ${validLon}`);
+            logger.info(`[SUCCESS] Weather data sent for ${validLat}, ${validLon}`);
 
             res.json(response);
         } catch (error) {
-            console.error('[ERROR] Weather Controller:', error.message);
+            logger.error('[ERROR] Weather Controller:', { message: error.message });
 
-            // Send appropriate error response
             res.status(500).json({
                 error: 'Internal Server Error',
                 message: error.message || 'An unexpected error occurred',
@@ -201,7 +195,6 @@ class WeatherController {
             recommendations.push('[+] Conditions météo idéales pour les activités extérieures');
         }
 
-        // Default message if no specific recommendations
         if (recommendations.length === 0) {
             recommendations.push('[+] Conditions météorologiques acceptables');
         }

@@ -156,7 +156,26 @@ router.post('/ban', async (req, res) => {
             });
         }
 
-        const banInfo = await ipBanManager.banIP(ip, reason || 'Manual ban', duration || 0);
+        // Validate IP format (IPv4 or IPv6)
+        const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}$/;
+        const ipv6Regex = /^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}$/;
+        if (!ipv4Regex.test(ip) && !ipv6Regex.test(ip) && ip !== '::1') {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid IP address format',
+            });
+        }
+
+        // Validate duration if provided
+        const banDuration = Number(duration) || 0;
+        if (banDuration < 0) {
+            return res.status(400).json({
+                success: false,
+                error: 'Duration must be a positive number (minutes)',
+            });
+        }
+
+        const banInfo = await ipBanManager.banIP(ip, reason || 'Manual ban', banDuration);
 
         res.json({
             success: true,

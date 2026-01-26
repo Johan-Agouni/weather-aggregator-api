@@ -1,5 +1,5 @@
 /**
- * Weather Aggregator API Server - SECURE VERSION
+ * AtmoSphere API Server - SECURE VERSION
  *
  * Express server with comprehensive security features:
  * - Helmet (security headers)
@@ -7,7 +7,7 @@
  * - Advanced rate limiting
  * - Attack detection (SQL injection, XSS, etc.)
  * - Request logging (Winston)
- * - Security monitoring dashboard
+ * - Security monitoring dashboard with authentication
  */
 
 const express = require('express');
@@ -28,8 +28,10 @@ const {
     strictLimiter,
     patternAnalysisMiddleware,
 } = require('./security/middleware/rateLimiting');
+const { dashboardAuth } = require('./security/middleware/dashboardAuth');
 const logger = require('./security/monitoring/logger');
 const { analytics } = require('./security/monitoring/analytics');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -49,7 +51,7 @@ app.use(customHeaders);
 // 3. CORS (configured for security)
 app.use(
     cors({
-        origin: process.env.CORS_ORIGIN || '*',
+        origin: process.env.CORS_ORIGIN || (NODE_ENV === 'production' ? false : true),
         methods: ['GET', 'POST', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization'],
         credentials: true,
@@ -131,24 +133,25 @@ app.use(express.static(path.join(__dirname, '../public')));
 // ====================
 // RATE LIMITING
 // ====================
-// Apply moderate rate limiting to all API routes
+// Apply moderate rate limiting to weather API routes
 app.use('/api/weather', moderateLimiter);
 app.use('/api/forecast', moderateLimiter);
 
-// Apply rate limiting to security routes (whitelist dashboard endpoints)
-app.use('/api/security', (req, res, next) => {
-    // Dashboard endpoints = pas de rate limit strict (auto-refresh toutes les 5s)
-    const dashboardEndpoints = ['/stats', '/events', '/banned-ips', '/suspicious-ips'];
-
-    const isDashboard = dashboardEndpoints.some(endpoint => req.path.startsWith(endpoint));
-
-    if (isDashboard) {
-        return next(); // Skip strict rate limiting for dashboard
-    }
-
-    // Autres endpoints = strict rate limit
-    return strictLimiter(req, res, next);
+// Dashboard rate limiter (generous but present)
+const dashboardLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 300, // 300 requests per window
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many requests to dashboard', message: 'Please try again later' },
 });
+
+// Apply rate limiting and authentication to security routes
+app.use('/api/security', dashboardLimiter, dashboardAuth);
+
+// Apply strict rate limiting to non-dashboard security endpoints (ban/unban actions)
+app.use('/api/security/ban', strictLimiter);
+app.use('/api/security/unban', strictLimiter);
 
 // ====================
 // ROUTES
@@ -159,11 +162,6 @@ app.use('/api', require('./routes/weather'));
 
 // Security monitoring routes
 app.use('/api/security', require('./security/routes/securityRoutes'));
-
-// Security dashboard (HTML page)
-app.get('/admin/security', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/admin/index.html'));
-});
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -198,7 +196,7 @@ app.use('/api/*', (req, res) => {
 });
 
 // Global error handler
-app.use((err, req, res, next) => {
+app.use((err, req, res, _next) => {
     const ip = req.ip || req.connection.remoteAddress;
 
     logger.error('Server error:', {
@@ -219,73 +217,48 @@ app.use((err, req, res, next) => {
 // ====================
 // START SERVER
 // ====================
-const server = app.listen(PORT, () => {
-    console.log('╔══════════════════════════════════════════════╗');
-    console.log('║   WEATHER AGGREGATOR API - SECURE SERVER    ║');
-    console.log('╚══════════════════════════════════════════════╝');
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
-    console.log(`📊 Environment: ${NODE_ENV}`);
-    console.log(`⏱️  Cache TTL: ${process.env.CACHE_TTL || 300} seconds`);
-    console.log('');
-    console.log('🛡️  SECURITY FEATURES ENABLED:');
-    console.log('   ✅ Helmet (Security Headers)');
-    console.log('   ✅ IP Banning System (Fail2ban-like)');
-    console.log('   ✅ Advanced Rate Limiting');
-    console.log('   ✅ Attack Detection (SQL, XSS, Path Traversal)');
-    console.log('   ✅ Request Logging (Winston)');
-    console.log('   ✅ Pattern Analysis');
-    console.log('');
-    console.log(`📊 Security Dashboard: http://localhost:${PORT}/admin/security`);
-    console.log(`📋 API Documentation: http://localhost:${PORT}/api/security/health`);
-    console.log('══════════════════════════════════════════════');
-
-    logger.info('Server started successfully', {
-        port: PORT,
-        environment: NODE_ENV,
+if (require.main === module) {
+    const server = app.listen(PORT, () => {
+        logger.info('Server started successfully', {
+            port: PORT,
+            environment: NODE_ENV,
+            cacheTTL: process.env.CACHE_TTL || 300,
+            dashboard: `http://localhost:${PORT}/admin/`,
+        });
     });
-});
 
-// ====================
-// GRACEFUL SHUTDOWN
-// ====================
-process.on('SIGTERM', () => {
-    console.log('\n🛑 SIGTERM signal received: closing HTTP server');
-    logger.info('Server shutting down...');
-
-    server.close(() => {
-        console.log('✅ HTTP server closed');
-        logger.info('Server shut down successfully');
-        process.exit(0);
+    // ====================
+    // GRACEFUL SHUTDOWN
+    // ====================
+    process.on('SIGTERM', () => {
+        logger.info('SIGTERM signal received: closing HTTP server');
+        server.close(() => {
+            logger.info('Server shut down successfully');
+            process.exit(0);
+        });
     });
-});
 
-process.on('SIGINT', () => {
-    console.log('\n🛑 SIGINT signal received: closing HTTP server');
-    logger.info('Server shutting down...');
-
-    server.close(() => {
-        console.log('✅ HTTP server closed');
-        logger.info('Server shut down successfully');
-        process.exit(0);
+    process.on('SIGINT', () => {
+        logger.info('SIGINT signal received: closing HTTP server');
+        server.close(() => {
+            logger.info('Server shut down successfully');
+            process.exit(0);
+        });
     });
-});
 
-// Handle uncaught exceptions
-process.on('uncaughtException', error => {
-    console.error('❌ Uncaught Exception:', error);
-    logger.error('Uncaught Exception', {
-        error: error.message,
-        stack: error.stack,
+    // Handle uncaught exceptions
+    process.on('uncaughtException', error => {
+        logger.error('Uncaught Exception', {
+            error: error.message,
+            stack: error.stack,
+        });
+        process.exit(1);
     });
-    process.exit(1);
-});
 
-// Handle unhandled promise rejections
-process.on('unhandledRejection', (reason, promise) => {
-    console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
-    logger.error('Unhandled Rejection', {
-        reason: reason,
+    // Handle unhandled promise rejections
+    process.on('unhandledRejection', (reason, _promise) => {
+        logger.error('Unhandled Rejection', { reason });
     });
-});
+}
 
 module.exports = app;

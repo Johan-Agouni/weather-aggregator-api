@@ -1,7 +1,7 @@
 {
-  "name": "weather-aggregator-api",
+  "name": "atmosphere-api",
   "version": "1.0.0",
-  "description": "Terminal-style weather aggregator combining real-time weather data, UV index, and air quality metrics from multiple APIs",
+  "description": "Interactive 3D weather dashboard with globe visualization, real-time weather data, UV index, air quality metrics, and enterprise-level security",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
@@ -19,7 +19,7 @@
     "aggregator",
     "uv-index",
     "air-quality",
-    "terminal",
+    "globe-3d",
     "nodejs",
     "express",
     "security"
