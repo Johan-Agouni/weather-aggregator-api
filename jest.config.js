@@ -1,40 +1,26 @@
 module.exports = {
-    // Environnement de test
     testEnvironment: 'node',
-    
-    // Patterns de fichiers de tests
-    testMatch: [
-        '**/tests/**/*.test.js',
-        '**/__tests__/**/*.js'
-    ],
-    
-    // Coverage
-    collectCoverageFrom: [
-        'src/**/*.js',
-        '!src/server.js',
-        '!**/node_modules/**',
-        '!**/tests/**'
-    ],
-    
-    // Seuils de coverage (ajustés pour le début du projet)
+
+    testMatch: ['**/tests/**/*.test.js', '**/__tests__/**/*.js'],
+
+    collectCoverageFrom: ['src/**/*.js', '!src/server.js', '!**/node_modules/**', '!**/tests/**'],
+
     coverageThreshold: {
         global: {
-            branches: 1,
-            functions: 2,
-            lines: 4,
-            statements: 4
-        }
+            branches: 40,
+            functions: 50,
+            lines: 50,
+            statements: 50,
+        },
     },
-    
-    // Reporters
+
     coverageReporters: ['text', 'lcov', 'html'],
-    
-    // Timeout pour tests lents
+
     testTimeout: 10000,
-    
-    // Force exit après les tests
+
     forceExit: true,
-    
-    // Verbose output
-    verbose: true
+
+    verbose: true,
+
+    setupFiles: ['./tests/setup.js'],
 };

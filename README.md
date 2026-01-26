@@ -1,340 +1,205 @@
-# 🌤️ Weather Aggregator API
+# AtmoSphere
 
-**Terminal-style weather aggregator with enterprise-level security** 
+**Interactive 3D weather dashboard with real-time security monitoring**
 
-Real-time weather data, UV index, and air quality metrics from multiple APIs with comprehensive security features.
+Globe 3D visualization, real-time weather data, UV index, air quality metrics, and enterprise-level threat detection.
 
 ![License](https://img.shields.io/badge/license-MIT-blue)
-![Security](https://img.shields.io/badge/security-enterprise-brightgreen)
 ![Node](https://img.shields.io/badge/node-%3E%3D16.0.0-green)
 ![Tests](https://github.com/Johan-Agouni/weather-aggregator-api/actions/workflows/ci.yml/badge.svg)
 
 ---
 
-## 🎯 FEATURES
+## Features
 
-### Weather Data
-- ☀️ **Real-time weather** (temperature, conditions, humidity, wind)
-- 🌡️ **UV Index** with risk levels
-- 💨 **Air Quality Index** (AQI, PM2.5, PM10)
-- 📊 **7-day forecast** with interactive charts
-- 📍 **Geolocation support**
-- 🔍 **City autocomplete** (Nominatim OSM)
+### Weather Dashboard
+- **3D Globe** (Globe.gl) — Click anywhere on Earth to get weather data
+- **Real-time weather** — Temperature, conditions, humidity, wind, precipitation
+- **UV Index** with gradient bar and risk levels
+- **Air Quality** (AQI, PM2.5, PM10) with health recommendations
+- **7-day forecast** with Chart.js visualization
+- **City autocomplete** via Nominatim OpenStreetMap
+- **Geolocation** support
+- **Data export** (JSON / CSV)
 
-### Security Features 🛡️
-- ✅ **Helmet** - Secure HTTP headers
-- ✅ **IP Banning System** - Fail2ban-like automatic protection
-- ✅ **Attack Detection** - SQL Injection, XSS, Path Traversal, etc.
-- ✅ **Adaptive Rate Limiting** - 3-tier protection
-- ✅ **Request Pattern Analysis** - Detect scanning behavior
-- ✅ **Winston Logging** - Structured security logs
-- ✅ **Real-time Monitoring Dashboard** - Live threat visualization
-
----
-
-## 🖥️ SCREENSHOTS
-
-### Main App
-![Weather App](docs/screenshots/main-app.png)
-
-### Security Dashboard
-![Security Dashboard](docs/screenshots/security-dashboard.png)
+### Security System
+- **Helmet** — Secure HTTP headers with strict CSP
+- **IP Banning** — Fail2ban-like automatic protection with scoring
+- **Attack Detection** — SQL Injection, XSS, Path Traversal, Command Injection
+- **Adaptive Rate Limiting** — 3-tier protection
+- **Request Pattern Analysis** — Scanning behavior detection
+- **Winston Logging** — Structured security logs with daily rotation
+- **Real-time Dashboard** — Live threat visualization at `/admin/`
 
 ---
 
-## 🚀 QUICK START
+## Quick Start
 
 ### Prerequisites
 - Node.js >= 16.0.0
-- npm or yarn
 
 ### Installation
 
 ```bash
-# Clone the repository
 git clone https://github.com/Johan-Agouni/weather-aggregator-api.git
 cd weather-aggregator-api
-
-# Install dependencies
 npm install
-
-# Configure environment
 cp .env.example .env
-
-# Start the server
 npm start
 ```
 
-### Development Mode
+### Development
 
 ```bash
-npm run dev  # Uses nodemon for auto-reload
+npm run dev     # Nodemon auto-reload
+npm test        # Jest with coverage
+npm run lint    # ESLint
 ```
 
 ### Access
 
-- **Main App:** http://localhost:3000
-- **Security Dashboard:** http://localhost:3000/admin/security
-- **Health Check:** http://localhost:3000/health
+| Page | URL |
+|------|-----|
+| Weather Dashboard | http://localhost:3000 |
+| Security Dashboard | http://localhost:3000/admin/ |
+| Health Check | http://localhost:3000/health |
 
 ---
 
-## 📁 PROJECT STRUCTURE
+## Project Structure
 
 ```
-weather-aggregator-api/
-├── public/                  # Frontend
-│   ├── index.html          # Main weather app
-│   ├── style.css           # Terminal-style UI
-│   ├── script.js           # App logic
-│   └── admin/              # Security dashboard
+atmosphere-api/
+├── public/
+│   ├── index.html              # Main dashboard (Globe 3D)
+│   ├── style.css               # Dark Observatory theme
+│   ├── script.js               # Globe.gl, autocomplete, charts
+│   ├── favicon.svg
+│   └── admin/                  # Security dashboard
 │       ├── index.html
 │       ├── security-dashboard.css
 │       └── security-dashboard.js
 ├── src/
-│   ├── server.js           # Express server with security
-│   ├── controllers/        # Business logic
-│   ├── routes/             # API routes
-│   ├── services/           # External API calls
-│   ├── utils/              # Utilities
-│   └── security/           # Security system
-│       ├── middleware/     # Security middlewares
-│       ├── monitoring/     # Logging & analytics
-│       ├── utils/          # Threat detection
-│       ├── routes/         # Security API
-│       └── data/           # Banned IPs storage
-├── logs/                   # Security & error logs
-├── SECURITY.md             # Security documentation
+│   ├── server.js               # Express server
+│   ├── controllers/
+│   │   └── weatherController.js
+│   ├── routes/
+│   │   └── weather.js
+│   ├── services/               # External API integrations
+│   │   ├── openMeteoService.js
+│   │   ├── uvIndexService.js
+│   │   ├── airQualityService.js
+│   │   └── forecastService.js
+│   ├── utils/
+│   │   ├── cache.js
+│   │   ├── validator.js
+│   │   └── weatherCodes.js
+│   └── security/
+│       ├── middleware/          # Security middlewares
+│       │   ├── securityHeaders.js
+│       │   ├── attackDetection.js
+│       │   ├── ipBan.js
+│       │   ├── rateLimiting.js
+│       │   └── dashboardAuth.js
+│       ├── monitoring/
+│       │   ├── analytics.js
+│       │   └── logger.js
+│       ├── routes/
+│       │   └── securityRoutes.js
+│       └── utils/
+│           └── threatDetection.js
+├── tests/
+│   ├── unit/
+│   └── integration/
+├── SECURITY.md
 └── package.json
 ```
 
 ---
 
-## 🔐 SECURITY
+## API Endpoints
 
-This project implements **enterprise-level security** features:
+### Weather
 
-### Protection Layers
-
-1. **HTTP Security Headers** (Helmet)
-2. **IP Banning** (automatic & manual)
-3. **Attack Detection** (SQL, XSS, Path Traversal, etc.)
-4. **Rate Limiting** (adaptive, 3 levels)
-5. **Pattern Analysis** (detect scanning)
-6. **Logging** (Winston with rotation)
-
-### Security Dashboard
-
-Access real-time security monitoring:
 ```
-http://localhost:3000/admin/security
+GET /api/weather?lat={lat}&lon={lon}
+GET /api/forecast?lat={lat}&lon={lon}
 ```
 
-**Features:**
-- Live traffic statistics
-- Threat detection metrics
-- Banned IPs management
-- Suspicious IPs monitoring
-- Security events timeline
-- Performance metrics
+### Security
 
-See [SECURITY.md](SECURITY.md) for complete documentation.
-
----
-
-## 📡 API ENDPOINTS
-
-### Weather API
-
-```bash
-GET /api/weather?lat={latitude}&lon={longitude}
 ```
-
-**Response:**
-```json
-{
-  "location": { "lat": 43.5, "lon": 5.4 },
-  "weather": {
-    "temperature": 18,
-    "conditions": "Clear sky",
-    "humidity": 65,
-    "wind_speed": 12,
-    "precipitation": 0
-  },
-  "uv": {
-    "uv_index": 5,
-    "risk_level": "Moderate"
-  },
-  "air_quality": {
-    "aqi": 42,
-    "quality": "Good",
-    "pm2_5": 8.5,
-    "pm10": 15.2
-  },
-  "recommendations": [...]
-}
-```
-
-### Forecast API
-
-```bash
-GET /api/forecast?lat={latitude}&lon={longitude}
-```
-
-### Security API
-
-```bash
-GET /api/security/stats              # Statistics
-GET /api/security/events             # Recent events
-GET /api/security/banned-ips         # Banned IPs list
-GET /api/security/suspicious-ips     # Suspicious IPs
-POST /api/security/unban/:ip         # Unban IP
-POST /api/security/ban               # Ban IP manually
-GET /api/security/check/:ip          # Check IP status
+GET  /api/security/stats
+GET  /api/security/events?limit=50
+GET  /api/security/banned-ips
+GET  /api/security/suspicious-ips
+GET  /api/security/check/:ip
+POST /api/security/ban
+POST /api/security/unban/:ip
 ```
 
 ---
 
-## ⚙️ CONFIGURATION
+## Configuration
 
 ### Environment Variables
 
 ```bash
-# Server
 PORT=3000
 NODE_ENV=development
-
-# Cache
-CACHE_TTL=300  # 5 minutes
-
-# Rate Limiting
-RATE_LIMIT_WINDOW_MS=900000      # 15 minutes
-RATE_LIMIT_MAX_REQUESTS=100      # Max requests
-
-# Logging
+CACHE_TTL=300
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX_REQUESTS=100
+BAN_THRESHOLD_SCORE=300
+BAN_THRESHOLD_ATTEMPTS=20
 LOG_LEVEL=info
-
-# CORS
-CORS_ORIGIN=*  # Configure for production!
+CORS_ORIGIN=*
 ```
-
-### Security Configuration
-
-Adjust thresholds in:
-- `src/security/middleware/ipBan.js` - Ban thresholds
-- `src/security/utils/threatDetection.js` - Threat scores
-- `src/security/middleware/rateLimiting.js` - Rate limits
 
 ---
 
-## 🧪 TESTING
+## Tech Stack
 
-### Test Attack Detection
+| Layer | Technologies |
+|-------|-------------|
+| Backend | Node.js, Express, Helmet, Winston, node-cache |
+| Frontend | Vanilla JS, Globe.gl, Chart.js, CSS custom properties |
+| APIs | Open-Meteo (weather + air quality), CurrentUVIndex, Nominatim OSM |
+| Testing | Jest, Supertest |
+| CI/CD | GitHub Actions |
+| Linting | ESLint 9, Prettier |
+
+---
+
+## Testing
 
 ```bash
-# SQL Injection attempt
-curl "http://localhost:3000/api/weather?lat=1' OR '1'='1&lon=5"
-
-# XSS attempt
-curl "http://localhost:3000/api/weather?lat=<script>alert('xss')</script>&lon=5"
-
-# Check if IP gets flagged
-curl http://localhost:3000/api/security/check/YOUR_IP
-```
-
-### Monitor Security
-
-```bash
-# Watch logs
-tail -f logs/security-*.log
-
-# Check dashboard
-open http://localhost:3000/admin/security
+npm test                    # 84 tests, 9 suites
+npm run test:watch          # Watch mode
+npm run lint                # ESLint
 ```
 
 ---
 
-## 📊 TECH STACK
+## Security
 
-### Backend
-- **Node.js** - Runtime
-- **Express** - Web framework
-- **Axios** - HTTP client
-- **Helmet** - Security headers
-- **Winston** - Logging
-- **node-cache** - Caching
-
-### Frontend
-- **Vanilla JavaScript** - No frameworks
-- **Chart.js** - Data visualization
-- **CSS3** - Terminal-style UI
-- **JetBrains Mono** - Font
-
-### APIs Used
-- Open-Meteo (Weather & Air Quality)
-- CurrentUVIndex (UV data)
-- Nominatim OSM (Geocoding)
+See [SECURITY.md](SECURITY.md) for the complete security documentation, including:
+- Threat detection patterns and scoring
+- IP banning thresholds and configuration
+- Rate limiting tiers
+- Middleware pipeline architecture
+- Security dashboard features
 
 ---
 
-## 🤝 CONTRIBUTING
+## License
 
-Contributions are welcome!
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+MIT — see [LICENSE](LICENSE)
 
 ---
 
-## 📝 LICENSE
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## 👤 AUTHOR
+## Author
 
 **Johan Agouni**
 
 - GitHub: [@Johan-Agouni](https://github.com/Johan-Agouni)
-- Portfolio: [Coming Soon]
-
----
-
-## 🙏 ACKNOWLEDGMENTS
-
-- Open-Meteo for weather data API
-- OpenStreetMap Nominatim for geocoding
-- All open-source contributors
-
----
-
-## 📈 ROADMAP
-
-- [ ] User authentication & API keys
-- [ ] Database integration (MongoDB)
-- [ ] Email alerts for weather conditions
-- [ ] Mobile app (React Native)
-- [ ] Docker containerization
-- [ ] Kubernetes deployment
-- [ ] CI/CD pipeline
-- [ ] Unit & integration tests
-
----
-
-## 🐛 KNOWN ISSUES
-
-None at the moment. Report issues on GitHub!
-
----
-
-## 📞 SUPPORT
-
-For support, email johan.agouni@example.com or open an issue on GitHub.
-
----
-
-**Made with ❤️ for learning and portfolio showcase**

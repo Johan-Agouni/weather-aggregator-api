@@ -16,9 +16,10 @@ const helmetConfig = helmet({
             defaultSrc: ["'self'"],
             scriptSrc: [
                 "'self'",
-                "'unsafe-inline'", // Nécessaire pour les scripts inline du terminal
+                "'unsafe-inline'",
                 'https://cdn.jsdelivr.net', // Chart.js
                 'https://cdnjs.cloudflare.com',
+                'https://unpkg.com', // Globe.gl
             ],
             styleSrc: [
                 "'self'",
@@ -37,6 +38,7 @@ const helmetConfig = helmet({
                 'https://air-quality-api.open-meteo.com',
                 'https://currentuvindex.com',
                 'https://nominatim.openstreetmap.org',
+                'https://cdn.jsdelivr.net', // Chart.js source map
             ],
             frameSrc: ["'none'"],
             objectSrc: ["'none'"],

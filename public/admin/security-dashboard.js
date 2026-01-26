@@ -1,6 +1,6 @@
 /**
- * Security Dashboard - Frontend Logic
- * 
+ * AtmoSphere — Security Dashboard Frontend Logic
+ *
  * Gère l'affichage du dashboard de sécurité
  */
 
@@ -14,16 +14,16 @@ const AUTO_REFRESH_INTERVAL = 5000; // 5 secondes
 // ====================
 window.addEventListener('load', () => {
     console.log('[SECURITY DASHBOARD] Initializing...');
-    
+
     // Charger les données initiales
     loadDashboardData();
-    
+
     // Démarrer l'auto-refresh
     startAutoRefresh();
-    
+
     // Setup event listeners
     document.getElementById('refreshBtn').addEventListener('click', loadDashboardData);
-    
+
     console.log('[SECURITY DASHBOARD] Ready');
 });
 
@@ -34,7 +34,7 @@ function startAutoRefresh() {
     autoRefreshInterval = setInterval(() => {
         loadDashboardData(true); // silent = true (pas de loading indicator)
     }, AUTO_REFRESH_INTERVAL);
-    
+
     document.getElementById('autoRefreshStatus').textContent = 'ON';
 }
 
@@ -53,7 +53,7 @@ async function loadDashboardData(silent = false) {
     if (!silent) {
         showLoading();
     }
-    
+
     try {
         // Charger toutes les données en parallèle
         const [stats, events, bannedIPs, suspiciousIPs] = await Promise.all([
@@ -62,7 +62,7 @@ async function loadDashboardData(silent = false) {
             fetchBannedIPs(),
             fetchSuspiciousIPs()
         ]);
-        
+
         // Mettre à jour l'interface
         updateStatsDisplay(stats);
         updateThreatsDisplay(stats.threats);
@@ -71,7 +71,7 @@ async function loadDashboardData(silent = false) {
         updateBannedIPsList(bannedIPs);
         updateSuspiciousIPsList(suspiciousIPs);
         updateEventsList(events);
-        
+
         console.log('[DASHBOARD] Data updated successfully');
     } catch (error) {
         console.error('[DASHBOARD ERROR]', error);
@@ -119,15 +119,15 @@ async function unbanIP(ip) {
         const response = await fetch(`/api/security/unban/${ip}`, {
             method: 'POST'
         });
-        
+
         if (!response.ok) throw new Error('Failed to unban IP');
-        
+
         const data = await response.json();
         console.log(`[UNBAN] ${ip} unbanned successfully`);
-        
+
         // Recharger les données
         loadDashboardData();
-        
+
         return data;
     } catch (error) {
         console.error('[UNBAN ERROR]', error);
@@ -142,24 +142,34 @@ function updateStatsDisplay(stats) {
     // Total Requests
     document.getElementById('totalRequests').textContent = formatNumber(stats.requests.total);
     document.getElementById('requestsPerSec').textContent = stats.requests.requestsPerSecond;
-    
+
     // Blocked
     document.getElementById('blockedRequests').textContent = formatNumber(stats.requests.blocked);
-    
+
     // Suspicious
     document.getElementById('suspiciousRequests').textContent = formatNumber(stats.requests.suspicious);
-    
+
     // Uptime
     document.getElementById('uptime').textContent = stats.uptime.formatted;
 }
 
 function updateThreatsDisplay(threats) {
-    document.getElementById('sqlInjectionCount').textContent = threats.sql_injection || 0;
-    document.getElementById('xssCount').textContent = threats.xss || 0;
-    document.getElementById('pathTraversalCount').textContent = threats.path_traversal || 0;
-    document.getElementById('commandInjectionCount').textContent = threats.command_injection || 0;
-    document.getElementById('rateLimitCount').textContent = threats.rate_limit || 0;
-    document.getElementById('invalidInputCount').textContent = threats.invalid_input || 0;
+    const ids = {
+        sql_injection: 'sqlInjectionCount',
+        xss: 'xssCount',
+        path_traversal: 'pathTraversalCount',
+        command_injection: 'commandInjectionCount',
+        rate_limit: 'rateLimitCount',
+        invalid_input: 'invalidInputCount'
+    };
+
+    for (const [key, id] of Object.entries(ids)) {
+        const el = document.getElementById(id);
+        const val = threats[key] || 0;
+        el.textContent = val;
+        // Ajouter classe 'zero' si aucune menace
+        el.classList.toggle('zero', val === 0);
+    }
 }
 
 function updatePerformanceDisplay(performance) {
@@ -169,17 +179,17 @@ function updatePerformanceDisplay(performance) {
 
 function updateTrafficChart(requests) {
     const ctx = document.getElementById('trafficChart').getContext('2d');
-    
+
     // Détruire l'ancien graphique s'il existe
     if (trafficChart) {
         trafficChart.destroy();
     }
-    
+
     const total = requests.total || 1; // Éviter division par zéro
     const normalPercentage = ((requests.normal / total) * 100).toFixed(1);
     const suspiciousPercentage = ((requests.suspicious / total) * 100).toFixed(1);
     const blockedPercentage = ((requests.blocked / total) * 100).toFixed(1);
-    
+
     trafficChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
@@ -190,8 +200,8 @@ function updateTrafficChart(requests) {
             ],
             datasets: [{
                 data: [requests.normal, requests.suspicious, requests.blocked],
-                backgroundColor: ['#00FF41', '#FFFF00', '#FF0000'],
-                borderColor: '#0F0F0F',
+                backgroundColor: ['#10B981', '#F59E0B', '#EF4444'],
+                borderColor: '#121829',
                 borderWidth: 2
             }]
         },
@@ -202,28 +212,34 @@ function updateTrafficChart(requests) {
                 legend: {
                     position: 'bottom',
                     labels: {
-                        color: '#00FF41',
+                        color: '#94A3B8',
                         font: {
-                            family: 'JetBrains Mono',
+                            family: "'Inter', sans-serif",
                             size: 12
                         },
-                        padding: 15
+                        padding: 15,
+                        usePointStyle: true,
+                        pointStyleWidth: 10
                     }
                 },
                 tooltip: {
-                    backgroundColor: '#000000',
-                    titleColor: '#00FFFF',
-                    bodyColor: '#00FF41',
-                    borderColor: '#00FF41',
+                    backgroundColor: '#121829',
+                    titleColor: '#F1F5F9',
+                    bodyColor: '#94A3B8',
+                    borderColor: 'rgba(255, 255, 255, 0.08)',
                     borderWidth: 1,
+                    cornerRadius: 8,
+                    padding: 12,
                     titleFont: {
-                        family: 'JetBrains Mono'
+                        family: "'Inter', sans-serif",
+                        weight: 600
                     },
                     bodyFont: {
-                        family: 'JetBrains Mono'
+                        family: "'JetBrains Mono', monospace"
                     }
                 }
-            }
+            },
+            cutout: '65%'
         }
     });
 }
@@ -231,49 +247,56 @@ function updateTrafficChart(requests) {
 function updateBannedIPsList(bannedIPs) {
     const container = document.getElementById('bannedIPsList');
     document.getElementById('bannedCount').textContent = bannedIPs.length;
-    
+
     if (bannedIPs.length === 0) {
         container.innerHTML = '<div class="empty-state">No banned IPs</div>';
         return;
     }
-    
+
     container.innerHTML = bannedIPs.map(ip => `
         <div class="ip-item">
             <div class="ip-header">
-                <span class="ip-address">${ip.ip}</span>
-                <span class="ip-score">BANNED</span>
+                <span class="ip-address">${escapeHtml(ip.ip)}</span>
+                <span class="ip-score">Banned</span>
             </div>
-            <div class="ip-info">Reason: ${ip.reason}</div>
+            <div class="ip-info">Reason: ${escapeHtml(ip.reason)}</div>
             <div class="ip-info">Banned: ${formatDate(ip.bannedAt)}</div>
             <div class="ip-info">Expires: ${ip.expiresAt ? formatDate(ip.expiresAt) : 'Permanent'}</div>
             <div class="ip-info">Attempts: ${ip.attempts}</div>
             <div class="ip-actions">
-                <button class="unban-btn" onclick="handleUnban('${ip.ip}')">[ UNBAN ]</button>
+                <button class="unban-btn" data-ip="${escapeHtml(ip.ip)}">Unban</button>
             </div>
         </div>
     `).join('');
+
+    // Attacher les event listeners au lieu de onclick inline
+    container.querySelectorAll('.unban-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            handleUnban(btn.dataset.ip);
+        });
+    });
 }
 
 function updateSuspiciousIPsList(suspiciousIPs) {
     const container = document.getElementById('suspiciousIPsList');
     document.getElementById('suspiciousCount').textContent = suspiciousIPs.length;
-    
+
     if (suspiciousIPs.length === 0) {
         container.innerHTML = '<div class="empty-state">No suspicious IPs</div>';
         return;
     }
-    
+
     container.innerHTML = suspiciousIPs.map(ip => {
         const scoreClass = ip.score >= 75 ? '' : 'medium';
         return `
             <div class="ip-item suspicious">
                 <div class="ip-header">
-                    <span class="ip-address">${ip.ip}</span>
-                    <span class="ip-score ${scoreClass}">SCORE: ${ip.score}</span>
+                    <span class="ip-address">${escapeHtml(ip.ip)}</span>
+                    <span class="ip-score ${scoreClass}">Score: ${ip.score}</span>
                 </div>
                 <div class="ip-info">Attempts: ${ip.attempts}</div>
                 <div class="ip-info">Last Activity: ${formatDate(ip.lastAttempt)}</div>
-                <div class="ip-info">Threats: ${ip.threats.map(t => t.type).join(', ')}</div>
+                <div class="ip-info">Threats: ${ip.threats.map(t => escapeHtml(t.type)).join(', ')}</div>
             </div>
         `;
     }).join('');
@@ -281,29 +304,29 @@ function updateSuspiciousIPsList(suspiciousIPs) {
 
 function updateEventsList(events) {
     const container = document.getElementById('eventsList');
-    
+
     if (events.length === 0) {
         container.innerHTML = '<div class="empty-state">No recent events</div>';
         return;
     }
-    
+
     container.innerHTML = events.map(event => {
         const eventClass = event.type;
         const eventType = event.type.toUpperCase();
         const time = formatTime(event.timestamp);
-        
+
         let details = '';
         if (event.threatType) {
-            details = `Threat: ${event.threatType}`;
+            details = `Threat: ${escapeHtml(event.threatType)}`;
         } else if (event.endpoint) {
-            details = `${event.method} ${event.endpoint}`;
+            details = `${escapeHtml(event.method)} ${escapeHtml(event.endpoint)}`;
         }
-        
+
         return `
             <div class="event-item ${eventClass}">
                 <span class="event-time">${time}</span>
                 <span class="event-type">${eventType}</span>
-                <span class="event-ip">${event.ip}</span>
+                <span class="event-ip">${escapeHtml(event.ip)}</span>
                 ${details ? `<div class="event-details">${details}</div>` : ''}
             </div>
         `;
@@ -315,13 +338,13 @@ function updateEventsList(events) {
 // ====================
 async function handleUnban(ip) {
     if (!confirm(`Unban IP ${ip}?`)) return;
-    
+
     try {
         await unbanIP(ip);
         console.log(`[SUCCESS] IP ${ip} unbanned`);
     } catch (error) {
         console.error(`[ERROR] Failed to unban ${ip}`, error);
-        alert(`Failed to unban IP ${ip}`);
+        showError(`Failed to unban IP ${ip}`);
     }
 }
 
@@ -355,20 +378,40 @@ function formatTime(timestamp) {
     });
 }
 
+function escapeHtml(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
 function showLoading() {
-    // TODO: Implement loading indicator
-    console.log('[LOADING] Loading dashboard data...');
+    let overlay = document.getElementById('loadingOverlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'loadingOverlay';
+        overlay.className = 'loading-overlay';
+        overlay.innerHTML = '<div class="loading-content"><div class="spinner"></div><div class="loading-text">Loading data...</div></div>';
+        document.body.appendChild(overlay);
+    }
+    overlay.style.display = 'flex';
 }
 
 function hideLoading() {
-    // TODO: Hide loading indicator
-    console.log('[LOADING] Data loaded');
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) overlay.style.display = 'none';
 }
 
 function showError(message) {
     console.error('[ERROR]', message);
-    // TODO: Implement error display
+    let toast = document.getElementById('dashboardError');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'dashboardError';
+        toast.className = 'error-toast';
+        document.body.appendChild(toast);
+    }
+    toast.textContent = message;
+    toast.style.display = 'block';
+    setTimeout(() => { toast.style.display = 'none'; }, 5000);
 }
-
-// Expose functions globally for onclick handlers
-window.handleUnban = handleUnban;

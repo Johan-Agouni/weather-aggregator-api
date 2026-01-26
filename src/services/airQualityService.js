@@ -7,14 +7,12 @@
 
 const axios = require('axios');
 const cache = require('../utils/cache');
+const logger = require('../security/monitoring/logger');
 
 class AirQualityService {
     constructor() {
-        // Base URL from environment variable
         this.baseURL =
             process.env.AIR_QUALITY_URL || 'https://air-quality-api.open-meteo.com/v1/air-quality';
-
-        // Timeout from environment variable (default: 5 seconds)
         this.timeout = parseInt(process.env.API_TIMEOUT || '5000');
     }
 
@@ -25,16 +23,15 @@ class AirQualityService {
      * @returns {Promise<Object>} Air quality data
      */
     async getAirQuality(lat, lon) {
-        // Check cache first
         const cacheKey = cache.generateKey(lat, lon, 'air');
         const cachedData = cache.get(cacheKey);
 
         if (cachedData) {
-            console.log(`[CACHE HIT] Air quality for ${lat}, ${lon}`);
+            logger.info(`[CACHE HIT] Air quality for ${lat}, ${lon}`);
             return cachedData;
         }
 
-        console.log(`[CACHE MISS] Fetching air quality for ${lat}, ${lon}`);
+        logger.info(`[CACHE MISS] Fetching air quality for ${lat}, ${lon}`);
 
         try {
             const response = await axios.get(this.baseURL, {
@@ -56,12 +53,11 @@ class AirQualityService {
                 quality: this.getAirQualityLevel(data.us_aqi),
             };
 
-            // Store in cache
             cache.set(cacheKey, airData);
 
             return airData;
         } catch (error) {
-            console.error('[ERROR] Air Quality API:', error.message);
+            logger.error('[ERROR] Air Quality API:', { message: error.message });
 
             // Graceful degradation - return null data instead of throwing
             return {

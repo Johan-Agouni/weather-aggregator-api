@@ -89,6 +89,7 @@ class IPBanManager {
     async unbanIP(ip) {
         if (this.bannedIPs.has(ip)) {
             this.bannedIPs.delete(ip);
+            this.suspiciousIPs.delete(ip);
             await this.saveBannedIPs();
             logger.security.unban(ip);
             return true;
@@ -151,9 +152,9 @@ class IPBanManager {
 
         this.suspiciousIPs.set(ip, suspicious);
 
-        // Seuils de bannissement (augmentés pour faciliter les tests)
-        const BAN_THRESHOLD_SCORE = 300;
-        const BAN_THRESHOLD_ATTEMPTS = 20;
+        // Seuils de bannissement (configurables via variables d'environnement)
+        const BAN_THRESHOLD_SCORE = parseInt(process.env.BAN_THRESHOLD_SCORE, 10) || 300;
+        const BAN_THRESHOLD_ATTEMPTS = parseInt(process.env.BAN_THRESHOLD_ATTEMPTS, 10) || 20;
 
         if (
             suspicious.score >= BAN_THRESHOLD_SCORE ||
