@@ -1,7 +1,7 @@
 {
   "name": "atmosphere-api",
   "version": "1.0.0",
-  "description": "Dashboard météo interactif avec globe 3D, données temps réel, indice UV, qualité de l'air et système de sécurité intégré",
+  "description": "Interactive 3D weather dashboard with globe visualization, real-time weather data, UV index, air quality metrics, and enterprise-level security",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
