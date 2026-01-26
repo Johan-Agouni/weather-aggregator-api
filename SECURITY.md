@@ -23,7 +23,7 @@ This document describes the comprehensive security architecture implemented in t
 
 ## 🎯 SECURITY OVERVIEW
 
-The AtmoSphere implements **enterprise-level security** with multiple layers of protection:
+The AtmoSphere implements **multi-layered security** with the following protections:
 
 - **HTTP Security Headers** (Helmet)
 - **Attack Detection** (SQL Injection, XSS, Path Traversal, etc.)
