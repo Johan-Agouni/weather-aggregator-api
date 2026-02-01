@@ -12,6 +12,16 @@ Visualisation 3D du globe terrestre, données météo en temps réel, indice UV,
 
 ---
 
+## Aperçu
+
+![Dashboard météo avec globe 3D](docs/dashboard.jpg)
+
+![Prévisions 7 jours](docs/forecast.png)
+
+![Security Monitoring Dashboard](docs/security.png)
+
+---
+
 ## Architecture
 
 ```
