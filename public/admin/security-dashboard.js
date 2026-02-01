@@ -87,28 +87,28 @@ async function loadDashboardData(silent = false) {
 // API CALLS
 // ====================
 async function fetchStats() {
-    const response = await fetch('/api/security/stats');
+    const response = await fetch(`${API_BASE_URL}/api/security/stats`);
     if (!response.ok) throw new Error('Failed to fetch stats');
     const data = await response.json();
     return data.data;
 }
 
 async function fetchEvents() {
-    const response = await fetch('/api/security/events?limit=50');
+    const response = await fetch(`${API_BASE_URL}/api/security/events?limit=50`);
     if (!response.ok) throw new Error('Failed to fetch events');
     const data = await response.json();
     return data.data.events;
 }
 
 async function fetchBannedIPs() {
-    const response = await fetch('/api/security/banned-ips');
+    const response = await fetch(`${API_BASE_URL}/api/security/banned-ips`);
     if (!response.ok) throw new Error('Failed to fetch banned IPs');
     const data = await response.json();
     return data.data.bannedIPs;
 }
 
 async function fetchSuspiciousIPs() {
-    const response = await fetch('/api/security/suspicious-ips');
+    const response = await fetch(`${API_BASE_URL}/api/security/suspicious-ips`);
     if (!response.ok) throw new Error('Failed to fetch suspicious IPs');
     const data = await response.json();
     return data.data.suspiciousIPs;
@@ -116,7 +116,7 @@ async function fetchSuspiciousIPs() {
 
 async function unbanIP(ip) {
     try {
-        const response = await fetch(`/api/security/unban/${ip}`, {
+        const response = await fetch(`${API_BASE_URL}/api/security/unban/${ip}`, {
             method: 'POST'
         });
 

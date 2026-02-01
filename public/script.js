@@ -528,7 +528,7 @@ async function getWeatherData(lat, lon, cityName = null) {
     try {
         console.log(`[API] Fetching weather for ${lat}, ${lon}`);
 
-        const response = await fetch(`/api/weather?lat=${lat}&lon=${lon}`);
+        const response = await fetch(`${API_BASE_URL}/api/weather?lat=${lat}&lon=${lon}`);
         const data = await response.json();
 
         if (!response.ok) {
@@ -796,7 +796,7 @@ async function loadForecast(lat, lon) {
 
         console.log(`[FORECAST] Fetching for ${lat}, ${lon}`);
 
-        const response = await fetch(`/api/forecast?lat=${lat}&lon=${lon}`);
+        const response = await fetch(`${API_BASE_URL}/api/forecast?lat=${lat}&lon=${lon}`);
         const data = await response.json();
 
         if (!response.ok) {
